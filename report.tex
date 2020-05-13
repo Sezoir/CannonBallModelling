@@ -1,0 +1,425 @@
+% Setup
+\documentclass[12pt]{article}
+\title{\vspace{-60pt}PSBC Project 2: Projectile motion}
+\date{\today}
+
+% Packages
+\usepackage{geometry}
+\usepackage{lingmacros}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage[svgnames]{xcolor}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage{float}
+\usepackage[italicdiff]{physics}
+
+%Slightly bigger size: \scriptsize
+\lstset{
+  language=Matlab,                     % the language of the code
+  basicstyle=\scriptsize\ttfamily, % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\scriptsize\color{Blue},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it is 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=t,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  deletekeywords={data,frame,length,as,character},
+  keywordstyle=\color{RoyalBlue},      % keyword style
+  otherkeywords={},
+  commentstyle=\color{DarkGreen},   % comment style
+  stringstyle=\color{ForestGreen}      % string literal style
+}
+
+\lstset{literate=%
+   *{0}{{{\color{RoyalBlue}0}}}1
+    {1}{{{\color{RoyalBlue}1}}}1
+    {2}{{{\color{RoyalBlue}2}}}1
+    {3}{{{\color{RoyalBlue}3}}}1
+    {4}{{{\color{RoyalBlue}4}}}1
+    {5}{{{\color{RoyalBlue}5}}}1
+    {6}{{{\color{RoyalBlue}6}}}1
+    {7}{{{\color{RoyalBlue}7}}}1
+    {8}{{{\color{RoyalBlue}8}}}1
+    {9}{{{\color{RoyalBlue}9}}}1
+    {TRUE}{{{\color{RoyalBlue}TRUE}}}4
+    {FALSE}{{{\color{RoyalBlue}FALSE}}}5
+    {<-}{{{\color{Gray}<-}}}2
+}
+
+% Commands/Setup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\vect}[1]{\underline{\boldsymbol{#1}}}
+\newcommand{\mat}[1]{\underline{\underline{\boldsymbol{#1}}}}
+\newcommand{\mean}[1]{\bar{#1}}
+\newcommand{\trans}[1]{#1^T}
+\newcommand{\est}[1]{\hat{#1}}
+\newcommand{\bfrac}[2]{\left(\frac{#1}{#2}\right)}
+\newcommand{\bb}[1]{\left(#1\right)}
+\newcommand{\inprod}[2]{\langle#1\,#2\rangle}
+\renewcommand{\exp}[1]{\text{exp}\left(#1\right)}
+\newcommand{\e}[1]{\text{e}^{#1}}
+
+% Note: this solution isn't compatible with hyperref package
+\let\oldref\ref
+\renewcommand{\ref}[1]{(\oldref{#1})}
+\newcommand{\apref}[1]{App-\ref{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Setup each page
+\geometry{
+a4paper,
+left=15mm,
+top=20mm,
+bottom=20mm,
+right=15mm,
+heightrounded
+}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+% Setup SI units
+\sisetup{
+group-digits = false
+}
+
+% Setup graphics location
+\graphicspath{{./Images/}}
+
+% Document
+\begin{document}
+
+% Title page
+\maketitle
+
+\section*{Introduction}
+Vectors in this report will be represented bold with a underline, for example $\vect{v}$. Also we will be using radians to express angles.
+
+Furthermore, any reference with prefix "App-", refers to a piece of code given in the appendix. An example of this is App-(1).
+%Furthermore, all code necessary for each question will be included, however I will also repeat all code for all questions at the end in a "Appendix" chapter.
+
+% Start
+\section{Question 1}
+For this question we are given that a projectile has been fired at $\SI{450}{\metre\per\second}$ at some angle $\theta$. We want to find the maximum horizontal distance, with it's associated angled, of the projectile. The only forces that are applied to the particle are assumed to be gravity (with the gravitational constant $g=\SI{9.8}{\meter\per\second\tothe{2}}$), and the friction force $F=K\abs{\vect{v}}^2$ opposite to the direction of the velocity $\vect{v}$ of the projectile, with constant $K=\SI{0.00002}{\kilo\gram\per\meter}$. The mass of the projectile is given as $\SI{6}{\kilo\gram}$.
+
+\subsection{Calculating the first order system}
+For this question, let $\vect{r}=(x,y)$ be the position vector of the projectile. Now if we look at the vector of the friction force opposite to the direction of the velocity $\vect{v}$, we would get:
+\begin{equation*}
+  \vect{F} = K\abs{\vect{v}}^2(-\vect{e}_r) = K\abs{\vect{v}}^2\left(-\frac{1}{\abs{\vect{v}}}\vect{v}\right) = -K\abs{\vect{v}}\vect{v}
+\end{equation*}
+where $\vect{e_r}$ is the unit direction vector of the projectile. Using this, we now consider the forces acting on the particle in the x and y axis:
+\begin{gather*}
+  m\dv[2]{r_x}{t} = \text{Friction} = -K\abs{\vect{v}}\dv{r_x}{t} \\
+  m\dv[2]{r_y}{t} = \text{Weight} + \text{Friction} = -mg - K\abs{\vect{v}}\dv{r_y}{t}
+\end{gather*}
+where $r_x$ and $r_y$ are respective functions of t of their vector entries. Equivalently, we can write this as:
+\begin{gather*}
+  \dv[2]{r_x}{t} = -\frac{K}{m}\abs{\vect{v}}\dv{r_x}{t} \\
+  \dv[2]{r_y}{t} = -g - \frac{K}{m}\abs{\vect{v}}\dv{r_y}{t}
+\end{gather*}
+The initial conditions for this problem would be given by:
+\begin{align*}
+  &r_x(0) = 0,   &&r_x'(0) = 450\cos(\frac{\pi}{4}), \\
+  &r_y(0) = 0,   &&r_y'(0) = 450\sin(\frac{\pi}{4})
+\end{align*}
+We now want to turn this problem into an equivalent first order system. Let $a=r_x'$ and $b=r_y'$. Then we can write the first order system of our problem as:
+\begin{equation*}
+  \left\{
+    \begin{split}
+      &r_x' = a \\
+      &r_y' = b \\
+      &a' = -\frac{K}{m}\abs{\vect{v}}a = -\frac{K}{m}a\sqrt{a^2+b^2} \\
+      &b' = -g -\frac{K}{m}\abs{\vect{v}}b = -g -\frac{K}{m}b\sqrt{a^2+b^2}
+    \end{split}
+  \right.
+\end{equation*}
+with initial conditions:
+\begin{equation*}
+  (x_0,y_0,a_0,b_0) = \left(0,0, 450\cos(\frac{\pi}{4}),450\sin(\frac{\pi}{4})\right)
+\end{equation*}
+
+\subsection{Solving the first order system}
+To solve this first order system, create a function ``projectileODE", which takes some angle $\theta$ and a event function, and returns a vector and matrix of the time and path respectively corresponding to the particle during flight. Note that the path matrix is constructed such that a row is in the form $(r_x, r_y, a, b)$. The code for this function is given by \apref{1_projectileODE}.
+
+As we have let the interval of time for the ODE be set between 0 and infinity, we use the event function to stop the ode45 when we have hit the ``ground", that is when $y=0$. The event function for this question we will use is given by \apref{1_groundEvent}.
+
+The last function we will create, is simply a function to return the horizontal distance after the projectile has landed called ``maxHori", for a given angle $\theta$, using the created functions. This function is given by \apref{1_maxHori}.
+
+Finally, to find the maximum horizontal distance and the associated angle, we use the function ``fminbnd", to minimise the horizontal distances between the associated angles $[0,\frac{\pi}{2}]$. As this function only minimises, then the function argument input for ``fminbnd" will be the negative distance. The reason for this is that the maximum horizontal distance, is equivalent to the minimum negative maximum horizontal distance. Note that after we get the distance, we must take the negative of it, so that we get the distance as positive. Altogether, this is given by:
+\begin{lstlisting}[title={Main code}]
+  [theta,distance] = fminbnd(@(theta)-maxHori(theta), 0, pi/2);
+  theta
+  distance = -distance
+\end{lstlisting}
+Which give the output of this as:
+\begin{lstlisting}[title={Console output for question 1}]
+theta =
+   0.778422268652416
+
+distance =
+     1.961776755647775e+04
+\end{lstlisting}
+So to get the maximum horizontal distance from the origin, we must fire at an angle of ``theta", in which the horizontal distance travelled is about $\SI{19618}{\meter}$ when rounded.
+
+
+\section{Question 2}
+For this question, we are under similar constraints as in question 1 for the projectile, however we want to hit a target $\SI{15000}{\meter}$ horizontally away from the origin. Furthermore, $\SI{12000}{\meter}$ horizontally away from the origin  are interceptors, of vertical length $\SI{1000}{\meter}$, travelling vertically upwards at $\SI{100}{\meter\per\second}$. These interceptors are launched every 20 seconds from the ground. We want to find all launch angles and firing times (starting from $t=0$), such that the cannonball at the origin can hit the target.
+
+We can split this problem into two questions. What angles have a horizontal distance of $\SI{15000}{\meter}$ from the origin when fired. And what time frames does the projectile not get blocked by the interceptors, for each angle.
+
+\subsection{The angles associated with a horizontal distance of $\SI{15000}{\meter}$}
+From question 1 we know that $\SI{15000}{\meter}$ is not the maximum horizontal distance from the origin. Furthermore, as we increase the angle $\theta$ from 0, towards the angle associated with the maximum horizontal distance from the origin, we get the horizontal distance from the origin increasing. Oppositely, as we increase the angle $\theta$, past the angle associated with the maximum horizontal distance towards $\frac{\pi}{2}$, we get the horizontal distance from the origin decreasing. Therefore we can say that there can only exist two potential angles which will give us a horizontal distance from the origin as $\SI{15000}{\meter}$. Hence, there must exist an angle in the boundary $(0, 0.778422268652416)$ and an angle in $(0.778422268652416, \frac{\pi}{2})$.
+
+Now using the same functions given in questions 1, we can create a new function called ``dist", which takes some angle $\theta$ and returns the ``maxDist" function minus $15000$. Then we can use the function ``fzero", to look for the angles which make the function ``dist" equal to zero, between the boundaries given before. The code for this is given by:
+\begin{lstlisting}[title={Main code for finding potential angles}]
+  % Find the exact angle associated with the max horizontal distance.
+  maxAngle = fminbnd(@(theta)-maxHori(theta), 0, pi/2);
+  % Function which just takes 15000 from the horizontal distance given by
+  % maxHori.
+  dist = @(theta) maxHori(theta) - 15000;
+  % Find the two angles, between the given boundaries.
+  angle1 = fzero(dist, [0,maxAngle])
+  angle2 = fzero(dist, [maxAngle,pi/2])
+\end{lstlisting}
+This gives the outputted angles as:
+\begin{lstlisting}[title={Output for potential angles}]
+  angle1 =
+   0.425365590818037
+
+  angle2 =
+   1.133637131955319
+\end{lstlisting}
+
+\subsection{Finding the time frames for each angle}
+The first thing we want to calculate is the height and time of the projectile for each angle, when it has reached a horizontal distance of $\SI{12000}{\meter}$ from the origin. We do this by creating a function called ``vert", which takes an angle $\theta$ and a horizontal distance $x$, and returns the time and vertical distance of the projectile when it has launched at angle $\theta$ and reached a horizontal distance $x$ from the origin. We do this by simply using the same function from question 1, ``projectileODE", where we change the event function passed in, such that it stops the ODE when it has reached a horizontal distance of $x$ meters. The code for the function ``vert" is given by \apref{2_vert}, and the event function code is given by \apref{2_horiEvent}. The code called when using the vert function with our two calculated angles is given as:
+\begin{lstlisting}[title={Using vert with the two angles}]
+  [time1, height1] = vert(angle1, 12000)
+  [time2, height2] = vert(angle2, 12000)
+\end{lstlisting}
+This gives the output as:
+\begin{lstlisting}[title={Output of vert}]
+time1 =
+  29.890726332174467
+
+height1 =
+     1.117127012875581e+03
+
+time2 =
+  65.018575705556188
+
+height2 =
+     5.318965428650329e+03
+\end{lstlisting}
+
+What we should note about the interceptors, is that as each interceptor moves at exactly $\SI{100}{\meter\per\second}$ constantly, with a new interceptor being launched every 20 seconds, then a ``pattern" emerges of the interceptors below the highest interceptor, which repeats every $\SI{2000}{\meter}$ from the ground to the highest interceptor. So, every 20 seconds the pattern returns to the pattern at $t=0$. So we want to find the initial time frame for each angle, as after that time frame the "pattern" of the intercepts will repeat at regular intervals. Using this fact then we are only interested in ``$\text{time}\pmod{20}$". Furthermore, as the ``pattern" repeats every $\SI{2000}{\meter}$, then we are only interested in ``$\text{height}\pmod{2000}$". Note, that we can only make these assumptions because the speed of the interceptors and launch time intervals stay constant for all time. Also note that at $t=65$ the highest interceptor has a height greater than $9000$.  We find these values using the following code:
+\begin{lstlisting}[title={Modulus of height and time}]
+  % The pattern of interceptors reset every 20 seconds, and every 2000 meters
+  % so take mod of the times and heights.
+  mtime1 = mod(time1,20)
+  mtime2 = mod(time2,20)
+  mheight1 = mod(height1,2000)
+  mheight2 = mod(height2,2000)
+\end{lstlisting}
+Giving the output as:
+\begin{lstlisting}[title={Output of modulus}]
+  mtime1 =
+     9.890726332174467
+
+  mtime2 =
+     5.018575705556188
+
+  mheight1 =
+       1.117127012875581e+03
+
+  mheight2 =
+       1.318965428650329e+03
+\end{lstlisting}
+We want to find now, when the projectile is fired at $t=0$ and arrives at $x=\SI{12000}{\meter}$, will it hit a interceptor? We can model the top and bottom of the ``gap" between the two interceptors by:
+\begin{gather*}
+  g^\text{Top}(t) = 100t+1000 \\
+  g^\text{Bottom}(t) = 100t
+\end{gather*}
+Now using matlab and find the distance travelled by the gap after the modulus times, using the code:
+\begin{lstlisting}[title={Gap motion}]
+  % Now calculate the positions of the "open interval" after m time.
+  gap = @(t,offset) 100*t+offset; % Quick function to save time
+  gapT1 = gap(mtime1, 1000)
+  gapT2 = gap(mtime2, 1000)
+  gapB1 = gap(mtime1, 0)
+  gapB2 = gap(mtime2, 0)
+\end{lstlisting}
+Giving the following output:
+\begin{lstlisting}[title={Gap motion output}]
+  gapT1 =
+       1.989072633217447e+03
+
+  gapT2 =
+       1.501857570555619e+03
+
+  gapB1 =
+       9.890726332174467e+02
+
+  gapB2 =
+       5.018575705556188e+02
+\end{lstlisting}
+We can see that $\text{mheight1}\in[\text{gapB1},\text{gapT1}]$ and $\text{mheight2}\in[\text{gapB2},\text{gapT2}]$. So at $t=0$, the projectile will make it past the interceptors for both angles. Now we want to calculate the delayed time we can shoot, that is for a constant $\tau$ then $\tau$ is the largest value such that the projectile can make it past without hitting the top of the interceptor below. We can find this by using the following equation:
+\begin{equation*}
+  Time = \frac{\text{Difference in distance}}{\text{Speed}}
+\end{equation*}
+This is implemented using the following code:
+\begin{lstlisting}[title={Remaining time}]
+  % Both projectials are in the gap, so calculate the delay time before
+  % interceptor reaches projectile.
+  dtime1 = (mheight1-gapB1)/100
+  dtime2 = (mheight2-gapB2)/100
+\end{lstlisting}
+With the following output:
+\begin{lstlisting}[title={Remaining time output}]
+  dtime1 =
+     1.280543796581343
+
+  dtime2 =
+     8.171078580947103
+\end{lstlisting}
+So the initial time interval for angles1 is [0, dtime1], and for angle2 is [0, dtime2]. Now, we use the fact that each interceptor is $\SI{1000}{\meter}$ travelling at $\SI{100}{\meter\per\second}$. So for the bottom of the interceptor to travel past the height of the projectile, it will take:
+\begin{equation*}
+  \text{time} = \frac{\text{Length}}{\text{Speed}} = \frac{1000}{100} = \SI{10}{\second}
+\end{equation*}
+Then as the gap is the same length and travels at the same speed as the interceptor, then it would also take $\SI{10}{\second}$ for the end of the gap to reach the height of the projectile. Hence, we have a repeating pattern after the initial time interval for each angle. So altogether for angle1, the associated firing time intervals are given as:
+\begin{equation*}
+  [0, \text{dtime1}], [20n+10+\text{dtime1}, 20n+20+\text{dtime1}], \qq{for} n=0,1,2,\ldots
+\end{equation*}
+Similarly, for angle2, the associated firing time intervals are given as:
+\begin{equation*}
+  [0, \text{dtime2}], [20n+10+\text{dtime2}, 20n+20+\text{dtime2}], \qq{for} n=0,1,2,\ldots
+\end{equation*}
+The whole of the main code used for question 2 is given in \apref{2_main}.
+
+
+\section*{Appendix}
+\begin{lstlisting}[caption={projectileODE function},label={1_projectileODE}]
+  function [time, path] = projectileODE(theta, event)
+  %% Returns the time and path vector for an ODE under gravity and air resistance.
+
+  % Check for angle to be zero, in which case ignore as otherwise we get
+  % errors with ode45.
+  if(theta==0)
+    time = [0];
+    path = [0 0 0 0];
+   return
+  end
+  % Set constants to be used, given by the question.
+  k= 0.00002;
+  m = 6;
+  g = 9.8;
+  v0 = 450;
+  % Set the options of the ODE. We bound the "event" function as an
+  % event to look for during the numerical integration (this allows us to use
+  % this function with different events depending on circumstance).
+  options = odeset('Events',@(t,z)event(t,z), 'refine',5,'AbsTol',1e-4,'MaxStep',1e-3);
+  % We set up out ode variable to be integrated according to our first order
+  % system. Note that z = (x y a b).
+  myode = @(t,z) [z(3); z(4); ...
+       -(k/m)*sqrt(z(3)^2+z(4)^2)*z(3); ...
+    -g-((k/m)*sqrt(z(3)^2+z(4)^2)*z(4))];
+  % Now solve the ODE. Note we set the time span between 0 and infinite,
+  % since we want the "event" to stop the ODE when it is triggered.
+  % Also we use symbolic and double transformations when theta=pi/2,
+  % we do not get the correct initial conditions, leading to a incorrect
+  % answer (Note that this method sacrifices performance for precision).
+  [time, path] = ode45(@(t,z)myode(t,z), [0 inf], [0 0 v0*double(cos(sym(theta))) v0*double(sin(sym(theta)))], options);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={groundEvent function}, label={1_groundEvent}]
+  function [value, isterminal, direction] = groundEvent(t, z)
+  %% An event function, to stop the ODE algorithm after the projectile hits the "ground", which is in this case when y=0.
+
+  % Trigger the event when "value" is zero.
+  value = z(2);
+
+  % Stop ODE algorithm when the event is triggered.
+  isterminal = 1;
+
+  % Used to only locate zeros when the event function is decrease
+  % (that is when the projectile is coming down to hit the ground).
+  direction = -1;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={maxHori function}, label={1_maxHori}]
+  function distance = maxHori(theta)
+  %% Returns the horizontal distance travelled by a projectile under gravity and air resistance for some launch angle theta.
+
+  % Get the time vector and path matrix for the projectile.
+  [time, path] = projectileODE(theta, @groundEvent);
+  % Return the horizontal distance.
+  distance = path(end,1);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={vert function},label={2_vert}]
+  function [time,distance] = vert(theta, x)
+  %% Returns the time and vertical distance of a projectile under gravity and air resistance for some launch angle theta after it has travelled x meters.
+  % Get the time and path vectors for the projectile.
+  [time, path] = projectileODE(theta, @(t,z)horiEvent(t,z,x));
+  % Return the horizontal distance.
+  distance = path(end,2);
+  time = time(end);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={horiEvent function},label={2_horiEvent}]
+  function [value , isterminal , direction] = horiEvent(t,z,x)
+  %% An event function to stop the ODE algorithm after the projectile reaches a horizontal distance x.
+
+  % Trigger the event when "value" is zero. In this case when the difference
+  % between distance x and the current horizontal distance has reached 0.
+  value = x-z(1);
+
+  % Stop ODE algorithm when the event is triggered.
+  isterminal = 1;
+
+  % Used to only locate zeros when the event function is decrease
+  % (that is when the projectile is coming down to hit the ground).
+  direction = -1;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Question 2 main code},label={2_main}]
+  % Find the exact angle associated with the max horizontal distance.
+  maxAngle = fminbnd(@(theta)-maxHori(theta), 0, pi/2);
+  % Function which just takes 15000 from the horizontal distance given by
+  % maxHori.
+  dist = @(theta) maxHori(theta) - 15000;
+  % Find the two angles, between the given boundaries.
+  angle1 = fzero(dist, [0,maxAngle])
+  angle2 = fzero(dist, [maxAngle,pi/2])
+
+  [time1, height1] = vert(angle1, 12000)
+  [time2, height2] = vert(angle2, 12000)
+
+  % The pattern of interceptors reset every 20 seconds, and every 2000 meters
+  % so take mod of the times and heights.
+  mtime1 = mod(time1,20)
+  mtime2 = mod(time2,20)
+  mheight1 = mod(height1,2000)
+  mheight2 = mod(height2,2000)
+  % Now calculate the positions of the "open interval" after m time.
+  gap = @(t,offset) 100*t+offset; % Quick function to save time
+  gapT1 = gap(mtime1, 1000)
+  gapT2 = gap(mtime2, 1000)
+  gapB1 = gap(mtime1, 0)
+  gapB2 = gap(mtime2, 0)
+  % Both projectials are in the gap, so calculate the delay time before
+  % interceptor reaches projectile.
+  dtime1 = (mheight1-gapB1)/100
+  dtime2 = (mheight2-gapB2)/100
+\end{lstlisting}
+
+\end{document}
